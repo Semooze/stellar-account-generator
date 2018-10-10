@@ -1,0 +1,6 @@
+-r ./base.txt
+appdirs==1.4.3
+attrs==18.2.0
+black==18.6b4
+click==7.0
+toml==0.10.0

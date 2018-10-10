@@ -1,0 +1,10 @@
+-i https://pypi.org/simple
+--extra-index-url https://pypi.org/simple
+aiohttp==3.4.4
+async-timeout==3.0.1
+attrs==18.2.0
+chardet==3.0.4
+git+https://github.com/StellarCN/py-stellar-base.git@191845bae47bb20158ebba25c9f79e1e0f367cfa#egg=stellar-base
+idna==2.7
+multidict==4.4.2
+yarl==1.2.6
