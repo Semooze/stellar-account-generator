@@ -22,7 +22,9 @@ async def fund_with_friend_bot(address):
 
 async def create_tmp_account() -> Keypair:
     kp = Keypair.random()
-    await fund_with_friend_bot(kp.address().decode())
+    created = await fund_with_friend_bot(kp.address().decode())
+    if not created:
+        return None, None
     return kp.address().decode(), kp.seed().decode()
 
 
@@ -45,22 +47,17 @@ async def add_trust(seed):
     builder = Builder(secret=seed)
     builder.append_trust_op(destination=sys.argv[3], code="HOT")
     builder.sign()
-    # try:
     result = builder.submit()
     return result
-    # except:
-    #     raise
 
 
-async def pay_htkn(address):
-    builder = Builder(secret="SCWW4DQK4BGJYNPCAXBQOSLLQF2YDH32DCDFHZDS7MBEQT5ZSOIMZDVT")
-    builder.append_payment_op(destination=address, asset_issuer=sys.argv[3], asset_type="HOT", amount=sys.argv[4])
+async def pay_hot(address):
+    builder = Builder(secret="[insert secret seed]")
+    builder.append_payment_op(destination=address, asset_issuer=sys.argv[3], asset_code="HOT", amount=sys.argv[4])
     builder.sign()
-    # try:
     result = builder.submit()
     return result
-    # except:
-    #     raise
+
 
 
 async def create_account(xlm):
@@ -68,7 +65,8 @@ async def create_account(xlm):
     public_key = kp.address().decode()
     seed = kp.seed().decode()
     print(public_key, seed)
-    await fund_with_friend_bot(public_key)
+    result = await fund_with_friend_bot(public_key)
+    print(result)
     if Decimal(xlm) < 10000:
         return print("Wrong arguments money should at least 10000.")
 
@@ -78,7 +76,7 @@ async def create_account(xlm):
     if len(sys.argv) >= 4:
         await add_trust(seed)
     if len(sys.argv) == 5:
-        await pay_htkn(public_key)
+        await pay_hot(public_key)
 
     if Decimal(xlm) == 10000:
         return public_key, seed
@@ -88,9 +86,10 @@ async def create_account(xlm):
     while True:
         print(count)
         tmp_address, tmp_seed = await create_tmp_account()
+        if not tmp_address:
+            continue
         xdr = await merge_account(public_key, tmp_address, tmp_seed)
         result = await submit_transaction(xdr)
-        # print(count + 1)
         if result.status != 200:
             continue
         count += 1
@@ -101,7 +100,7 @@ async def create_account(xlm):
 
 if __name__ == "__main__":
     print(
-        "args\n1 number of account that want to create\n2 amount of money that want in new address\n3 issuer of trust when want trust HTKN\n4 amount of HTKN"
+        "args\n1 number of account that want to create\n2 amount of money that want in new address\n3 issuer of trust when want trust HOT\n4 amount of HOT"
     )
     if len(sys.argv) <= 1:
         print("Please insert amount of XLM as an argument")
